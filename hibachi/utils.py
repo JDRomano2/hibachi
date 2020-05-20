@@ -1,7 +1,9 @@
-# Code from scikit-MDR library
-# -*- coding: utf-8 -*-
-
 """
+Utility functions required for running the Hibachi algorithm.
+
+Adapted (with permission) from scikit-mdr under the following
+license agreement:
+
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
 to deal in the Software without restriction, including without limitation
@@ -21,11 +23,9 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from __future__ import print_function
 from collections import Counter
 from scipy import stats
-import numpy as np
-###############################################################################
+
 def entropy(X, base=2):
     """Calculates the entropy, H(X), in the given base
 
@@ -39,13 +39,12 @@ def entropy(X, base=2):
     Returns
     ----------
     entropy: float
-        The entropy calculated according to the equation
+        The entropy calculated according to the equation 
         H(X) = -sum(p_x * log p_x) for all states of X
 
     """
     return stats.entropy(list(Counter(X).values()), base=base)
 
-###############################################################################
 def joint_entropy(X, Y, base=2):
     """Calculates the joint entropy, H(X,Y), in the given base
 
@@ -61,14 +60,13 @@ def joint_entropy(X, Y, base=2):
     Returns
     ----------
     joint_entropy: float
-        The joint entropy calculated according to the equation
+        The joint entropy calculated according to the equation 
         H(X,Y) = -sum(p_xy * log p_xy) for all combined states of X and Y
 
     """
     X_Y = ['{}{}'.format(x, y) for x, y in zip(X, Y)]
     return entropy(X_Y, base=base)
 
-###############################################################################
 def conditional_entropy(X, Y, base=2):
     """Calculates the conditional entropy, H(X|Y), in the given base
 
@@ -90,7 +88,6 @@ def conditional_entropy(X, Y, base=2):
     """
     return joint_entropy(X, Y, base=base) - entropy(Y, base=base)
 
-###############################################################################
 def mutual_information(X, Y, base=2):
     """Calculates the mutual information between two variables, I(X;Y),
     in the given base
@@ -113,7 +110,6 @@ def mutual_information(X, Y, base=2):
     """
     return entropy(Y, base=base) - conditional_entropy(Y, X, base=base)
 
-###############################################################################
 def two_way_information_gain(X, Y, Z, base=2):
     """Calculates the two-way information gain between three variables,
     I(X;Y;Z), in the given base
@@ -147,7 +143,6 @@ def two_way_information_gain(X, Y, Z, base=2):
             mutual_information(X, Z, base=base) -
             mutual_information(Y, Z, base=base))
 
-###############################################################################
 def three_way_information_gain(W, X, Y, Z, base=2):
     """Calculates the three-way information gain between three variables,
     I(W;X;Y;Z), in the given base
