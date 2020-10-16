@@ -9,6 +9,8 @@ import numpy as np
 
 from deap import algorithms, base, creator, tools, gp
 
+import ipdb
+
 from . import io as hibachi_io
 
 def eval_individual(individual, xdata, xtranspose):
@@ -28,41 +30,16 @@ def pareto_eq(ind1, ind2):
     """
     return np.all(ind1.fitness.values == ind2.fitness.values)
 
-def hibachi(pop, gen, rseed, showall):
-    """Set up stats and population size, then start the hibachi process.
 
-    Parameters
-    ----------
-    pop
-    gen
-    rseed : int
-    showall
-    """
-    pass
-
-class Run:
+class Hibachi:
     """Run the Hibachi application to generate a dataset.
     """
     def __init__(self):
-        options = hibachi_io.parse_args()
+        self.options = hibachi_io.parse_args()
 
-        self.infile = options['file']
-        self.evaluate = options['evaluation']
-        self.population = options['population']
-        self.generations = options['generations']
-        self.rdf_count = options['random_data_files']
-        self.ig = options['information_gain']
-        self.rows = options['rows']
-        self.cols = options['columns']
-        self.stats = options['statistics']
-        self.trees = options['trees']
-        self.fitness = options['fitness']
-        self.prcnt = options['percent']
-        self.outdir = options['outdir']
-        self.showall = options['showallfitnesses']
-        self.model_file = options['model_file']
+        ipdb.set_trace()
 
-        if options['seed'] is None:
+        if self.options.seed is None:
             self.rseed = -999
         else:
             self.rseed = options['seed']
@@ -90,9 +67,9 @@ class Run:
             'ig' + str(self.ig) + "way.txt"
         ])
 
-        self._run_algorithm()
+        self._run()
 
-    def _run_algorithm(self):
+    def _run(self):
         pass
         # Read data into list of lists
 

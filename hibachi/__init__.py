@@ -1,9 +1,9 @@
 import sys
 
-from hibachi.hib import Run
+from .hib import Hibachi
 
-def run_hibachi():
-    try:
-        Run()
-    except KeyboardInterrupt:
-        sys.exit(1)
+# def run_hibachi():
+#     try:
+#         Hibachi()
+#     except KeyboardInterrupt:
+#         sys.exit(1)

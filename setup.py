@@ -3,10 +3,10 @@
 from distutils.core import setup
 
 setup(
-    name='Hibachi',
+    name='HIBACHI',
     version='1.0-alpha',
     description='Data simulation software that creates data sets with particular characteristics',
-    author='Pete Schmitt and Joseph D. Romano',
+    author='Joseph D. Romano, Pete Schmidt, and Patryk Orzechowski',
     author_email='joseph.romano@pennmedicine.upenn.edu',
     url='https://github.com/EpistasisLab/hibachi',
     python_requires='>=3.7',
