@@ -26,6 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 from collections import Counter
 from scipy import stats
 
+
 def entropy(X, base=2):
     """Calculates the entropy, H(X), in the given base
 
@@ -44,6 +45,7 @@ def entropy(X, base=2):
 
     """
     return stats.entropy(list(Counter(X).values()), base=base)
+
 
 def joint_entropy(X, Y, base=2):
     """Calculates the joint entropy, H(X,Y), in the given base
@@ -64,8 +66,9 @@ def joint_entropy(X, Y, base=2):
         H(X,Y) = -sum(p_xy * log p_xy) for all combined states of X and Y
 
     """
-    X_Y = ['{}{}'.format(x, y) for x, y in zip(X, Y)]
+    X_Y = ["{}{}".format(x, y) for x, y in zip(X, Y)]
     return entropy(X_Y, base=base)
+
 
 def conditional_entropy(X, Y, base=2):
     """Calculates the conditional entropy, H(X|Y), in the given base
@@ -88,6 +91,7 @@ def conditional_entropy(X, Y, base=2):
     """
     return joint_entropy(X, Y, base=base) - entropy(Y, base=base)
 
+
 def mutual_information(X, Y, base=2):
     """Calculates the mutual information between two variables, I(X;Y),
     in the given base
@@ -109,6 +113,7 @@ def mutual_information(X, Y, base=2):
 
     """
     return entropy(Y, base=base) - conditional_entropy(Y, X, base=base)
+
 
 def two_way_information_gain(X, Y, Z, base=2):
     """Calculates the two-way information gain between three variables,
@@ -138,10 +143,13 @@ def two_way_information_gain(X, Y, Z, base=2):
         IG(X;Y;Z) = I(X,Y;Z) - I(X;Z) - I(Y;Z)
 
     """
-    X_Y = ['{}{}'.format(x, y) for x, y in zip(X, Y)]
-    return (mutual_information(X_Y, Z, base=base) -
-            mutual_information(X, Z, base=base) -
-            mutual_information(Y, Z, base=base))
+    X_Y = ["{}{}".format(x, y) for x, y in zip(X, Y)]
+    return (
+        mutual_information(X_Y, Z, base=base)
+        - mutual_information(X, Z, base=base)
+        - mutual_information(Y, Z, base=base)
+    )
+
 
 def three_way_information_gain(W, X, Y, Z, base=2):
     """Calculates the three-way information gain between three variables,
@@ -176,11 +184,13 @@ def three_way_information_gain(W, X, Y, Z, base=2):
             - I(W;Z) - I(X;Z) - I(Y;Z)
 
     """
-    W_X_Y = ['{}{}{}'.format(w, x, y) for w, x, y in zip(W, X, Y)]
-    return (mutual_information(W_X_Y, Z, base=base) -
-            two_way_information_gain(W, X, Z, base=base) -
-            two_way_information_gain(W, Y, Z, base=base) -
-            two_way_information_gain(X, Y, Z, base=base) -
-            mutual_information(W, Z, base=base) -
-            mutual_information(X, Z, base=base) -
-            mutual_information(Y, Z, base=base))
+    W_X_Y = ["{}{}{}".format(w, x, y) for w, x, y in zip(W, X, Y)]
+    return (
+        mutual_information(W_X_Y, Z, base=base)
+        - two_way_information_gain(W, X, Z, base=base)
+        - two_way_information_gain(W, Y, Z, base=base)
+        - two_way_information_gain(X, Y, Z, base=base)
+        - mutual_information(W, Z, base=base)
+        - mutual_information(X, Z, base=base)
+        - mutual_information(Y, Z, base=base)
+    )

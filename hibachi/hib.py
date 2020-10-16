@@ -13,8 +13,10 @@ import ipdb
 
 from . import io as hibachi_io
 
+
 def eval_individual(individual, xdata, xtranspose):
     pass
+
 
 def pareto_eq(ind1, ind2):
     """Determine whether two individuals are equal on the Pareto front.
@@ -34,6 +36,7 @@ def pareto_eq(ind1, ind2):
 class Hibachi:
     """Run the Hibachi application to generate a dataset.
     """
+
     def __init__(self):
         self.options = hibachi_io.parse_args()
 
@@ -42,30 +45,32 @@ class Hibachi:
         if self.options.seed is None:
             self.rseed = -999
         else:
-            self.rseed = options['seed']
+            self.rseed = options["seed"]
 
         random.seed(self.rseed)
         np.random.seed(self.rseed)
 
-        if self.infile == 'random':
-            self.infile_base = 'random'
+        if self.infile == "random":
+            self.infile_base = "random"
         else:
             self.infile_base = os.path.splitext(os.path.basename(self.infile))[0]
 
-        self.rowxcol = str(self.rows) + 'x' + str(cols)
-        self.popstr = 'p' + str(self.population)
-        self.genstr = 'g' + str(self.generations)
+        self.rowxcol = str(self.rows) + "x" + str(cols)
+        self.popstr = "p" + str(self.population)
+        self.genstr = "g" + str(self.generations)
 
-        self.out_file = '-'.join([
-            "results",
-            self.infile_base,
-            self.rowxcol,
-            's' + str(self.rseed),
-            self.popstr,
-            self.genstr,
-            self.evaluate,
-            'ig' + str(self.ig) + "way.txt"
-        ])
+        self.out_file = "-".join(
+            [
+                "results",
+                self.infile_base,
+                self.rowxcol,
+                "s" + str(self.rseed),
+                self.popstr,
+                self.genstr,
+                self.evaluate,
+                "ig" + str(self.ig) + "way.txt",
+            ]
+        )
 
         self._run()
 
