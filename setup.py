@@ -13,8 +13,12 @@ setup(
     install_requires=[
         'deap',
         'scikit-mdr',
-        'pygraphviz'
     ],
+    entry_points = {
+        'console_scripts': [
+            'hibachi = hibachi.hib:run_hibachi'
+        ]
+    },
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

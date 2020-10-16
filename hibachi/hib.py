@@ -9,8 +9,6 @@ import numpy as np
 
 from deap import algorithms, base, creator, tools, gp
 
-import ipdb
-
 from . import io as hibachi_io
 
 
@@ -40,17 +38,15 @@ class Hibachi:
     def __init__(self):
         self.options = hibachi_io.parse_args()
 
-        ipdb.set_trace()
-
-        if self.options.seed is None:
-            self.rseed = -999
+        if self.options.rand_seed is None:
+            self.rseed = random.randint(0, 1000)
         else:
-            self.rseed = options["seed"]
+            self.rseed = self.options.rand_seed
 
         random.seed(self.rseed)
         np.random.seed(self.rseed)
 
-        if self.infile == "random":
+        if self.options.infile == "random":
             self.infile_base = "random"
         else:
             self.infile_base = os.path.splitext(os.path.basename(self.infile))[0]
@@ -83,3 +79,6 @@ class Hibachi:
         # Set up stats and population size
 
         # Start the process
+
+def run_hibachi():
+    h = Hibachi()
