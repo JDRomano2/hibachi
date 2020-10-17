@@ -5,6 +5,7 @@ Tools for handling file input and output.
 from dataclasses import dataclass
 import argparse
 
+import numpy as np
 
 
 @dataclass
@@ -42,6 +43,7 @@ def parse_args():
         "-e",
         "--evaluation",
         type=str,
+        default="normal",
         help="name of evaluation [normal|folds|subsets|noise|oddsratio]"
         + " (default=normal) note: oddsratio sets columns == 10",
     )
@@ -49,16 +51,22 @@ def parse_args():
         "-f",
         "--infile",
         type=str,
+        default="random",
         help="name of training data file (REQ)"
         + " filename of random will create all data",
     )
     parser.add_argument(
-        "-g", "--num_generations", type=int, help="number of generations (default=40)"
+        "-g",
+        "--num_generations",
+        type=int,
+        default=40,
+        help="number of generations (default=40)",
     )
     parser.add_argument(
         "-i",
         "--inf_gain_type",
         type=int,
+        default=2,
         help="information gain 2 way or 3 way (default=2)",
     )
     parser.add_argument(
@@ -89,6 +97,7 @@ def parse_args():
         "-s",
         "--rand_seed",
         type=int,
+        default=np.random.randint(1, 1001),
         help="random seed to use (default=random value 1-1000)",
     )
     parser.add_argument(
@@ -101,6 +110,7 @@ def parse_args():
         "-C",
         "--num_columns",
         type=int,
+        default=3,
         help="random data columns (default=3) note: "
         + "evaluation of oddsratio sets columns to 10",
     )
@@ -114,7 +124,11 @@ def parse_args():
         help="percentage of case for case/control (default=25)",
     )
     parser.add_argument(
-        "-R", "--num_rows", type=int, help="random data rows (default=1000)"
+        "-R",
+        "--num_rows",
+        type=int,
+        default=1000,
+        help="random data rows (default=1000)",
     )
     parser.add_argument(
         "-S", "--plot_statistics", help="plot statistics", action="store_true"
@@ -138,3 +152,23 @@ def parse_args():
     options = InputOptions(**vars(args))
 
     return options
+
+
+def make_random_data(n_rows, n_cols, rseed=None):
+    if seed != None:
+        np.random.seed(rseed)
+    data = np.random.randint(0, 3, size=(rows, cols))
+    return data
+
+
+def get_input_data(infile, n_rows=None, n_cols=None, rseed=42):
+    if infile == "random":
+        if (n_rows is None) or (n_cols is None):
+            raise ValueError(
+                "Number of rows and columns must be provided when generating random data."
+            )
+        data = make_random_data(n_rows, n_cols, rseed)
+    else:
+        data = np.genfromtxt(infile, dtype=np.int, delimiter="\t")
+
+    return data
