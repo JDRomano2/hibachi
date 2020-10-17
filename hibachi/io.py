@@ -155,9 +155,9 @@ def parse_args():
 
 
 def make_random_data(n_rows, n_cols, rseed=None):
-    if seed != None:
+    if rseed != None:
         np.random.seed(rseed)
-    data = np.random.randint(0, 3, size=(rows, cols))
+    data = np.random.randint(0, 3, size=(n_rows, n_cols))
     return data
 
 

@@ -12,6 +12,7 @@ import numpy as np
 from deap import algorithms, base, creator, tools, gp
 
 from . import io as hibachi_io
+from . import operators as ops
 
 
 def eval_individual(individual, xdata, xtranspose):
@@ -33,41 +34,41 @@ def pareto_eq(ind1, ind2):
     return np.all(ind1.fitness.values == ind2.fitness.values)
 
 
-def build_primitive_set():
+def build_primitive_set(inst_length):
     """Define a new primitive set for strongly typed GP."""
     pset = gp.PrimitiveSetTyped(
         "MAIN", itertools.repeat(float, inst_length), float, "X"
     )
     # basic operators
-    pset.addPrimitive(op.addition, [float, float], float)
-    pset.addPrimitive(op.subtract, [float, float], float)
-    pset.addPrimitive(op.multiply, [float, float], float)
-    pset.addPrimitive(op.safediv, [float, float], float)
-    pset.addPrimitive(op.modulus, [float, float], float)
-    pset.addPrimitive(op.plus_mod_two, [float, float], float)
+    pset.addPrimitive(ops.addition, [float, float], float)
+    pset.addPrimitive(ops.subtract, [float, float], float)
+    pset.addPrimitive(ops.multiply, [float, float], float)
+    pset.addPrimitive(ops.safediv, [float, float], float)
+    pset.addPrimitive(ops.modulus, [float, float], float)
+    pset.addPrimitive(ops.plus_mod_two, [float, float], float)
     # logic operators
-    pset.addPrimitive(op.equal, [float, float], float)
-    pset.addPrimitive(op.not_equal, [float, float], float)
-    pset.addPrimitive(op.gt, [float, float], float)
-    pset.addPrimitive(op.lt, [float, float], float)
-    pset.addPrimitive(op.AND, [float, float], float)
-    pset.addPrimitive(op.OR, [float, float], float)
-    pset.addPrimitive(op.xor, [float, float], float)
+    pset.addPrimitive(ops.equal, [float, float], float)
+    pset.addPrimitive(ops.not_equal, [float, float], float)
+    pset.addPrimitive(ops.gt, [float, float], float)
+    pset.addPrimitive(ops.lt, [float, float], float)
+    pset.addPrimitive(ops.AND, [float, float], float)
+    pset.addPrimitive(ops.OR, [float, float], float)
+    pset.addPrimitive(ops.xor, [float, float], float)
     # bitwise operators
-    pset.addPrimitive(op.bitand, [float, float], float)
-    pset.addPrimitive(op.bitor, [float, float], float)
-    pset.addPrimitive(op.bitxor, [float, float], float)
+    pset.addPrimitive(ops.bitand, [float, float], float)
+    pset.addPrimitive(ops.bitor, [float, float], float)
+    pset.addPrimitive(ops.bitxor, [float, float], float)
     # unary operators
-    pset.addPrimitive(op.abs, [float], float)
-    pset.addPrimitive(op.NOT, [float], float)
-    pset.addPrimitive(op.factorial, [float], float)
-    pset.addPrimitive(op.left, [float, float], float)
-    pset.addPrimitive(op.right, [float, float], float)
+    pset.addPrimitive(op.abs, [float], float)  # Should we implement natively?
+    pset.addPrimitive(ops.NOT, [float], float)
+    pset.addPrimitive(ops.factorial, [float], float)
+    pset.addPrimitive(ops.left, [float, float], float)
+    pset.addPrimitive(ops.right, [float, float], float)
     # large operators
-    pset.addPrimitive(op.power, [float, float], float)
-    pset.addPrimitive(op.logAofB, [float, float], float)
-    pset.addPrimitive(op.permute, [float, float], float)
-    pset.addPrimitive(op.choose, [float, float], float)
+    pset.addPrimitive(ops.power, [float, float], float)
+    pset.addPrimitive(ops.logAofB, [float, float], float)
+    pset.addPrimitive(ops.permute, [float, float], float)
+    pset.addPrimitive(ops.choose, [float, float], float)
     # misc operators
     pset.addPrimitive(min, [float, float], float)
     pset.addPrimitive(max, [float, float], float)
@@ -121,7 +122,7 @@ class Hibachi:
 
         self.read_data()
 
-        self.pset = build_primitive_set()
+        self.pset = build_primitive_set(self.data.shape[-1])
 
         # set up a DEAP individual and register it in the toolbox
         if self.options.evaluation == "oddsratio":
@@ -132,17 +133,20 @@ class Hibachi:
 
         self.toolbox = base.Toolbox()
         self.toolbox.register("expr", gp.genHalfAndHalf, pset=self.pset, min_=2, max_=5)
+        self.toolbox.register("individual", tools.initIterate, creator.Individual, self.toolbox.expr)
+        self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
+        self.toolbox.register("compile", gp.compile, pset=self.pset)
 
     def read_data(self):
         if self.options.infile == "random":
-            hibachi_io.get_input_data(
-                self.options.infile,
+            self.data = hibachi_io.get_input_data(
+                "random",
                 self.options.num_rows,
                 self.options.num_columns,
                 self.rseed,
             )
         else:
-            hibachi_io.get_input_data(self.options.infile)
+            self.data = hibachi_io.get_input_data(self.options.infile)
 
     def _run(self):
         pass
