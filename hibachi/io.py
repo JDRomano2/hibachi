@@ -83,6 +83,7 @@ def parse_args():
         "-o",
         "--outdir",
         type=str,
+        default=".",
         help="name of output directory (default = .)"
         + " Note: the directory will be created if it does not exist",
     )
@@ -196,6 +197,12 @@ def read_model(in_file):
         m = m.rstrip()
     return m
 
+def write_model(outfile, best):
+    """ write top individual out to model file """
+    f = open(outfile, 'w')
+    f.write(str(best[0]))
+    f.write('\n')
+    f.close()
 
 def create_OR_table(best,fitness,seed,outdir,rowxcol,popstr,
                     genstr,evaluate,ig):

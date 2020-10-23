@@ -171,13 +171,13 @@ class Hibachi():
             print()
 
         if self.options.model_file:
-            individual = io.read_model(self.options.model_file)
+            individual = hibachi_io.read_model(self.options.model_file)
             func = self.toolbox.compile(expr=individual)
             result = [(func(*inst[:self.inst_length])) for inst in data]
             nresult = evals.reclass_result(self.x, result, self.options.case_control_ratio)
             outfile = outdir + 'results_using_model_from_' + os.path.basename(self.options.model_file)
             print("Writing result to {0}".format(outfile))
-            io.create_file(self.x, nresult, outfile)
+            hibachi_io.create_file(self.x, nresult, outfile)
             if self.options.plot_best_trees():
                 M = gp.PrimitiveTree.from_string(individual, self.pset)
                 outtree = outdir + 'tree_' + str(self.rseed) + '.pdf'
@@ -226,6 +226,26 @@ class Hibachi():
         if self.options.outdir:
             if not os.path.exists(self.options.outdir):
                 os.makedirs(self.options.outdir)
+
+        # Save best individual to disk
+
+        outfile = "results-{0}-{1}-s{2}-{3}-{4}-{5}-ig{6}way.txt".format(
+            file1, self.rowxcol, self.rseed, self.popstr,
+            self.genstr, self.options.evaluation, self.options.inf_gain_type
+        )
+        outfile = os.path.join(self.options.outdir, outfile)
+        print("Writing data (with class labels) to {0}".format(outfile))
+        self.labels.sort(key=op.itemgetter(0), reverse=True)  # sort by igsum
+        hibachi_io.create_file(self.x, self.labels[0][1], outfile)
+
+        # Save best model to disk
+        moutfile = "model-{0}-{1}-s{2}-{3}-{4}-{5}-ig{6}way.txt".format(
+            file1, self.rowxcol, self.rseed, self.popstr,
+            self.genstr, self.options.evaluation, self.options.inf_gain_type
+        )
+        moutfile = os.path.join(self.options.outdir, moutfile)
+        print("Writing model to {0}".format(moutfile))
+        hibachi_io.write_model(moutfile, best)
 
     def read_data(self):
         if self.options.infile == "random":
