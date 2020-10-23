@@ -38,6 +38,7 @@
 #       CREATED:  02/06/2017 14:54:24 EST
 #      REVISION:  Fri Mar 16 14:54:07 EDT 2018
 #===============================================================================
+import ipdb
 import IO
 options = IO.get_arguments()
 from IO import printf
@@ -302,7 +303,7 @@ def hibachi(pop,gen,rseed,showall):
         stats.register("std", np.std)
         stats.register("min", np.min)
         stats.register("max", np.max)
-    
+
     pop, log = algorithms.eaMuPlusLambda(pop,toolbox,mu=MU,lambda_=LAMBDA, 
                           cxpb=0.7, mutpb=0.3, ngen=NGEN, stats=stats, 
                           verbose=True, halloffame=hof)
@@ -342,6 +343,7 @@ if(model_file != ""):
 #
 # Start evaluation here
 #
+
 pop, stats, hof, logbook = hibachi(population,generations,rseed,showall)
 best = []
 fitness = []

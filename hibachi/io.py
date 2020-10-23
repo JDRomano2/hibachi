@@ -85,12 +85,13 @@ def parse_args():
         + " Note: the directory will be created if it does not exist",
     )
     parser.add_argument(
-        "-p", "--pop_size", type=int, help="size of population (default=100)"
+        "-p", "--pop_size", type=int, default=100, help="size of population (default=100)"
     )
     parser.add_argument(
         "-r",
         "--rand_file_count",
         type=int,
+        default=0,
         help="number of random data to use instead of files (default=0)",
     )
     parser.add_argument(
@@ -121,6 +122,7 @@ def parse_args():
         "-P",
         "--case_control_ratio",
         type=int,
+        default=25,
         help="percentage of case for case/control (default=25)",
     )
     parser.add_argument(
@@ -171,4 +173,4 @@ def get_input_data(infile, n_rows=None, n_cols=None, rseed=42):
     else:
         data = np.genfromtxt(infile, dtype=np.int, delimiter="\t")
 
-    return data
+    return data.tolist(), data.transpose().tolist()
