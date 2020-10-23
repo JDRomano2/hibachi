@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import argparse
 
 import numpy as np
+import pandas as pd
 
 
 @dataclass
@@ -73,6 +74,7 @@ def parse_args():
         "-m",
         "--model_file",
         type=str,
+        default=None,
         help="model file to use to create Class from; otherwise \
               analyze data for new model.  Other options available \
               when using -m: [f,o,s,P]",
@@ -156,6 +158,18 @@ def parse_args():
     return options
 
 
+def create_file(x, result, outfile):
+    d = np.array(x).transpose()
+    columns = [0]*len(x)
+    for i in range(len(x)):
+        columns[i] = 'X'+str(i)
+
+    df = pd.DataFrame(d, columns=columns)
+
+    df['Class'] = result
+    df.to_csv(outfile, sep='\t', index=False)
+
+
 def make_random_data(n_rows, n_cols, rseed=None):
     if rseed != None:
         np.random.seed(rseed)
@@ -174,3 +188,37 @@ def get_input_data(infile, n_rows=None, n_cols=None, rseed=42):
         data = np.genfromtxt(infile, dtype=np.int, delimiter="\t")
 
     return data.tolist(), data.transpose().tolist()
+
+
+def read_model(in_file):
+    with open(in_file, 'r') as fp:
+        m = fp.read()
+        m = m.rstrip()
+    return m
+
+
+def create_OR_table(best,fitness,seed,outdir,rowxcol,popstr,
+                    genstr,evaluate,ig):
+    """ write out odd_ratio and supporting data """
+    fname = outdir + "or_sod_igsum-" + rowxcol + '-' 
+    fname += 's' + str(seed).zfill(3) + '-'
+    fname += popstr + '-' 
+    fname += genstr + '-' 
+    fname += evaluate + '-ig' + str(ig) + 'way.txt'
+    f = open(fname, 'w')
+    f.write("Individual\tFitness\tSOD\tigsum\tOR_list\tModel\n")
+    for i in range(len(best)):
+        f.write(str(i))
+        f.write('\t')
+        f.write(str(fitness[i][0]))
+        f.write('\t')
+        f.write(str(best[i].SOD))
+        f.write('\t')
+        f.write(str(best[i].igsum))
+        f.write('\t')
+        f.write(str(best[i].OR.tolist()))
+        f.write('\t')
+        f.write(str(best[i]))
+        f.write('\n')
+
+    f.close()

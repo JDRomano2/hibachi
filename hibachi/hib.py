@@ -9,6 +9,8 @@ import random
 import itertools
 import operator as op
 import numpy as np
+import pandas as pd
+import time
 
 from deap import algorithms, base, creator, tools, gp
 
@@ -87,7 +89,12 @@ class Hibachi():
     """
 
     def __init__(self):
+        self.start = time.time()
+
         self.options = hibachi_io.parse_args()
+
+        if self.options.plot_fitness or self.options.plot_best_trees or self.options.plot_statistics:
+            import visualize
 
         self.labels = []
         self.all_ig_sums = []
@@ -164,10 +171,61 @@ class Hibachi():
             print()
 
         if self.options.model_file:
-            # Finish implementing!
-            raise Exception
+            individual = io.read_model(self.options.model_file)
+            func = self.toolbox.compile(expr=individual)
+            result = [(func(*inst[:self.inst_length])) for inst in data]
+            nresult = evals.reclass_result(self.x, result, self.options.case_control_ratio)
+            outfile = outdir + 'results_using_model_from_' + os.path.basename(self.options.model_file)
+            print("Writing result to {0}".format(outfile))
+            io.create_file(self.x, nresult, outfile)
+            if self.options.plot_best_trees():
+                M = gp.PrimitiveTree.from_string(individual, self.pset)
+                outtree = outdir + 'tree_' + str(self.rseed) + '.pdf'
+                print("Saving tree plot to {0}".format(outtree))
+                visualize.plot_tree(M, self.rseed, self.options.outdir)
+            sys.exit(0)
 
-        pop, stats, hof, log = self._run()
+        pop, stats, hof, logbook = self._run()
+        best = []
+        fitness = []
+        for ind in hof:
+            best.append(ind)
+            fitness.append(ind.fitness.values)
+
+        print()
+        print("IND\tFITNESS\t\tMODEL")
+        for i in range(len(hof)):
+            print("{0}\t{1:.8f}\t{2}".format(i, fitness[i][0], str(best[i])))
+
+        if self.options.evaluation == 'oddsratio':
+            io.create_OR_table(best, fitness, self.rseed, self.options.outdir, self.rowxcol, self.genstr, self.options.evaluation, self.options.inf_gain_type)
+
+        record = stats.compile(pop)
+        print("Statistics:")
+        print(str(record))
+
+        tottime = time.time() - self.start
+        print()
+        if tottime > 3600:
+            print("Runtime: {0:.2f} hours".format(tottime/3600))
+        elif tottime > 60:
+            print("Runtime: {0:.2f} minutes".format(tottime/60))
+        else:
+            print("Runtime: {0:.2f} seconds".format(tottime))
+
+        df = pd.DataFrame(logbook)
+        del df['gen']
+        del df['nevals']
+
+        # ???
+        if self.options.infile == 'random':
+            file1 = 'random0'
+        else:
+            file1 = os.path.splitext(os.path.basename(self.options.infile))[0]
+
+        if self.options.outdir:
+            if not os.path.exists(self.options.outdir):
+                os.makedirs(self.options.outdir)
 
     def read_data(self):
         if self.options.infile == "random":
