@@ -19,11 +19,11 @@ class InputOptions:
     num_generations: int
     pop_size: int
     case_control_ratio: int
-    evaluation: str  # {'normal', 'folds', 'subsets', 'noise', 'oddsratio'}
+    mode: str  # {'normal', 'folds', 'subsets', 'noise', 'oddsratio'}
     rand_file_count: int  # "number of random data to use instead of files" ???
     rand_seed: int  # default rand int in [1,1000]
-    num_columns: int  # number of columns if random data are used
-    num_rows: int  # number of rows if random data are used
+    columns: int  # number of columns if random data are used
+    rows: int  # number of rows if random data are used
     inf_gain_type: int  # 2-way or 3-way
     show_all_fitness: bool
     plot_fitness: bool
@@ -32,43 +32,43 @@ class InputOptions:
     verbose: bool
 
 
-def parse_args():
+def _parse_args():
     options = dict()
 
     parser = argparse.ArgumentParser(
-        description="Run hibachi to generate a dataset with feature interactions.",
-        prog="HIBACHI",
+        prog="Hibachi",
+        description="Hibachi is a tool for generating datasets with interactions between the features using genetic programming. As an added benefit, Hibachi's output also includes an interpretable generative model that can be used to either introspect the dataset or to generate more data.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(
         "-e",
-        "--evaluation",
+        "--mode",
         type=str,
         default="normal",
-        help="name of evaluation [normal|folds|subsets|noise|oddsratio]"
-        + " (default=normal) note: oddsratio sets columns == 10",
+        help="Sets the mode for evaluation [normal|folds|subsets|noise|oddsratio]"
+        + " (note: oddsratio sets columns == 10",
     )
     parser.add_argument(
         "-f",
         "--infile",
         type=str,
         default="random",
-        help="name of training data file (REQ)"
-        + " filename of random will create all data",
+        help="Name of file containing the data used to train Hibachi (if `random`, a random dataset will be generated). Default: 'random'."
     )
     parser.add_argument(
         "-g",
         "--num_generations",
         type=int,
         default=40,
-        help="number of generations (default=40)",
+        help="Number of generations over which to run the evolutionary algorithm.",
     )
     parser.add_argument(
         "-i",
         "--inf_gain_type",
         type=int,
         default=2,
-        help="information gain 2 way or 3 way (default=2)",
+        help="Information gain type (2- or 3-way). Options are `2` or `3`.",
     )
     parser.add_argument(
         "-m",
@@ -76,7 +76,7 @@ def parse_args():
         type=str,
         default=None,
         help="model file to use to create Class from; otherwise \
-              analyze data for new model.  Other options available \
+              analyze data for new model. Other options available \
               when using -m: [f,o,s,P]",
     )
     parser.add_argument(
@@ -84,25 +84,23 @@ def parse_args():
         "--outdir",
         type=str,
         default=".",
-        help="name of output directory (default = .)"
-        + " Note: the directory will be created if it does not exist",
+        help="Name of the directory where all output files will be written (the directory will be created if it does not already exist)."
     )
     parser.add_argument(
-        "-p", "--pop_size", type=int, default=100, help="size of population (default=100)"
+        "-p", "--pop_size", type=int, default=100, help="Size of the population of individual models to be held during each generation of the algorithm."
     )
     parser.add_argument(
         "-r",
         "--rand_file_count",
         type=int,
         default=0,
-        help="number of random data to use instead of files (default=0)",
+        help="Number of random data files (with class labels) to generate using the winning model.",
     )
     parser.add_argument(
         "-s",
         "--rand_seed",
         type=int,
-        default=np.random.randint(1, 1001),
-        help="random seed to use (default=random value 1-1000)",
+        help="Random seed used in stochastic portions of the Hibachi algorithm (e.g., generating random data).",
     )
     parser.add_argument(
         "-A",
@@ -112,11 +110,17 @@ def parse_args():
     )
     parser.add_argument(
         "-C",
-        "--num_columns",
+        "--columns",
         type=int,
         default=3,
-        help="random data columns (default=3) note: "
-        + "evaluation of oddsratio sets columns to 10",
+        help="Number of columns in generated random data (only used when `-f random` is passed). Note: Number of columns is automatically set to 10 when evaluation is 'oddsratio'.",
+    )
+    parser.add_argument(
+        "-R",
+        "--rows",
+        type=int,
+        default=1000,
+        help="Number of rows in generated random data (only used when `-f random` is passed).",
     )
     parser.add_argument(
         "-F", "--plot_fitness", help="plot fitness results", action="store_true"
@@ -126,28 +130,21 @@ def parse_args():
         "--case_control_ratio",
         type=int,
         default=25,
-        help="percentage of case for case/control (default=25)",
+        help="Percent of rows in the output data that will be labeled as 'case', rather than 'control'.",
     )
     parser.add_argument(
-        "-R",
-        "--num_rows",
-        type=int,
-        default=1000,
-        help="random data rows (default=1000)",
-    )
-    parser.add_argument(
-        "-S", "--plot_statistics", help="plot statistics", action="store_true"
+        "-S", "--plot_statistics", help="Enable plotting of summary statistics.", action="store_true"
     )
     parser.add_argument(
         "-T",
         "--plot_best_trees",
-        help="plot best individual trees",
+        help="Enable plotting tree diagrams for the best individual models.",
         action="store_true",
     )
     parser.add_argument(
-        "-V",
+        "-v",
         "--verbose",
-        help="Print more information to screen while running",
+        help="Print more information to screen while running.",
         action="store_true",
     )
 

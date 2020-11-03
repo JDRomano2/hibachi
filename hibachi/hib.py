@@ -91,7 +91,7 @@ class Hibachi():
     def __init__(self):
         self.start = time.time()
 
-        self.options = hibachi_io.parse_args()
+        self.options = hibachi_io._parse_args()
 
         if self.options.plot_fitness or self.options.plot_best_trees or self.options.plot_statistics:
             import visualize
@@ -112,7 +112,7 @@ class Hibachi():
         else:
             self.infile_base = os.path.splitext(os.path.basename(self.infile))[0]
 
-        self.rowxcol = str(self.options.num_rows) + "x" + str(self.options.num_columns)
+        self.rowxcol = str(self.options.rows) + "x" + str(self.options.columns)
         self.popstr = "p" + str(self.options.pop_size)
         self.genstr = "g" + str(self.options.num_generations)
 
@@ -124,7 +124,7 @@ class Hibachi():
                 "s" + str(self.rseed),
                 self.popstr,
                 self.genstr,
-                self.options.evaluation,
+                self.options.mode,
                 "ig" + str(self.options.inf_gain_type) + "way.txt",
             ]
         )
@@ -140,7 +140,7 @@ class Hibachi():
         self.pset = build_primitive_set(self.inst_length)
 
         # set up a DEAP individual and register it in the toolbox
-        if self.options.evaluation == "oddsratio":
+        if self.options.mode == "oddsratio":
             creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0, -1.0))
         else:
             creator.create("FitnessMulti", base.Fitness, weights=(1.0, -1.0))
@@ -159,14 +159,14 @@ class Hibachi():
 
         if self.options.verbose:
             print("input data:  {0}".format(self.options.infile))
-            print("data shape:  {0} X {1}".format(self.options.num_rows, self.options.num_columns))
+            print("data shape:  {0} X {1}".format(self.options.rows, self.options.columns))
             print("random seed: {0}".format(self.rseed))
             print("pcnt. cases: {0}".format(self.options.case_control_ratio))
             print("output dir:  {0}".format(self.options.outdir))
             if self.options.model_file is None:
                 print("population size:  {0}".format(self.options.pop_size))
                 print("num. generations: {0}".format(self.options.num_generations))
-                print("evaluation type:  {0}".format(self.options.evaluation))
+                print("evaluation type:  {0}".format(self.options.mode))
                 print("ign 2/3 way:      {0}".format(self.options.inf_gain_type))
             print()
 
@@ -197,8 +197,8 @@ class Hibachi():
         for i in range(len(hof)):
             print("{0}\t{1:.8f}\t{2}".format(i, fitness[i][0], str(best[i])))
 
-        if self.options.evaluation == 'oddsratio':
-            io.create_OR_table(best, fitness, self.rseed, self.options.outdir, self.rowxcol, self.genstr, self.options.evaluation, self.options.inf_gain_type)
+        if self.options.mode == 'oddsratio':
+            io.create_OR_table(best, fitness, self.rseed, self.options.outdir, self.rowxcol, self.genstr, self.options.mode, self.options.inf_gain_type)
 
         record = stats.compile(pop)
         print("Statistics:")
@@ -231,7 +231,7 @@ class Hibachi():
 
         outfile = "results-{0}-{1}-s{2}-{3}-{4}-{5}-ig{6}way.txt".format(
             file1, self.rowxcol, self.rseed, self.popstr,
-            self.genstr, self.options.evaluation, self.options.inf_gain_type
+            self.genstr, self.options.mode, self.options.inf_gain_type
         )
         outfile = os.path.join(self.options.outdir, outfile)
         print("Writing data (with class labels) to {0}".format(outfile))
@@ -241,7 +241,7 @@ class Hibachi():
         # Save best model to disk
         moutfile = "model-{0}-{1}-s{2}-{3}-{4}-{5}-ig{6}way.txt".format(
             file1, self.rowxcol, self.rseed, self.popstr,
-            self.genstr, self.options.evaluation, self.options.inf_gain_type
+            self.genstr, self.options.mode, self.options.inf_gain_type
         )
         moutfile = os.path.join(self.options.outdir, moutfile)
         print("Writing model to {0}".format(moutfile))
@@ -251,8 +251,8 @@ class Hibachi():
         if self.options.infile == "random":
             self.data, self.x = hibachi_io.get_input_data(
                 "random",
-                self.options.num_rows,
-                self.options.num_columns,
+                self.options.rows,
+                self.options.columns,
                 self.rseed,
             )
         else:
@@ -268,7 +268,7 @@ class Hibachi():
         X = self.x
         data = self.data
 
-        eval_method = self.options.evaluation
+        eval_method = self.options.mode
 
         inst_length = self.inst_length
 
